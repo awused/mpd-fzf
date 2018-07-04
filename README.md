@@ -1,10 +1,10 @@
 # mpd-fzf
 
-mpd-fzf is a minimal [Music Player Daemon][mpd] (mpd) track selector that makes it easy to enqueue tracks after the current track.
+mpd-fzf is a minimal [Music Player Daemon][mpd] (mpd) track selector that makes it easy to enqueue tracks after the current track. This is not a full client and doesn't try to be.
 
 mpd-fzf parses the mpd database and passes a list of tracks to the [fzf][fzf] command-line finder. This offers a fast way to explore a music collection interactively.
 
-Tracks are formatted as "Artist - Track {Album} (MM:SS)", defaulting to the filename if there's insufficient information.
+Tracks are formatted as "AlbumArtist|Artist - Track // Artist {Album} (MM:SS)", defaulting to the filename if there's insufficient information.
 
 ## Installation
 
@@ -36,6 +36,7 @@ The biggest change is the behavioural change. Instead of staying open and playin
 * Doesn't require an external script
 * Performance when parsing the database and building FZF's input is improved
 * Works on FreeBSD
+* Uses Album Artist, when available, alongside Artist
 
 ### Bug Fixes
 

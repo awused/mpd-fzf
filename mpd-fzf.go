@@ -43,14 +43,15 @@ func keyval(line string) (string, string) {
 }
 
 type Track struct {
-	Album    string
-	Artist   string
-	Date     string
-	Filename string
-	Genre    string
-	Path     string
-	Time     string
-	Title    string
+	Album       string
+	Artist      string
+	AlbumArtist string
+	Date        string
+	Filename    string
+	Genre       string
+	Path        string
+	Time        string
+	Title       string
 }
 
 func (t *Track) Set(key, value string) {
@@ -58,7 +59,18 @@ func (t *Track) Set(key, value string) {
 	case "Album":
 		t.Album = value
 	case "Artist":
-		t.Artist = value
+		// Sometimes Artist is a very long string of names,
+		// don't discard them completely
+		if len(value) > 40 {
+			t.Artist = value[:40]
+		} else {
+			t.Artist = value
+		}
+	case "AlbumArtist":
+		// Sometimes AlbumArtist is a very long string of names, discard those
+		if len(value) < 30 {
+			t.AlbumArtist = value
+		}
 	case "Date":
 		t.Date = value
 	case "Genre":
@@ -124,13 +136,25 @@ func trackFormatter() func(*Track) string {
 
 	contentLen := width - 5 // remove 5 for fzf display
 	return func(t *Track) string {
-		str := t.Artist + " - " + t.Title
-		str = strings.TrimPrefix(str, " - ")
-		if str == "" {
-			str = withoutExt(t.Filename)
+		name := t.Title
+		if t.Title == "" {
+			name = withoutExt(t.Filename)
 		}
+
+		str := name
+
+		// TODO -- Some kind of column formatting? If the terminal is wide?
+		if t.AlbumArtist != "" && t.Artist != "" && t.AlbumArtist != t.Artist {
+			str = t.AlbumArtist + " - " + name + " // " + t.Artist
+		} else if t.AlbumArtist != "" {
+			str = t.AlbumArtist + " - " + name
+		} else if t.Artist != "" {
+			str = t.Artist + " - " + name
+		}
+
 		if t.Album != "" {
 			str += " {" + t.Album + "}"
+
 		}
 		str = truncateAndPad(str, contentLen-len(t.Time), "..")
 		return str + t.Time + delimiter + t.Path
@@ -169,7 +193,7 @@ func parse(scan *bufio.Scanner) []*Track {
 		case "end":
 			failOn(len(dirs) <= 0, "Invalid directory state. Corrupted database?")
 			dirs = dirs[:len(dirs)-1]
-		case "Artist", "Album", "Date", "Genre", "Time", "Title":
+		case "Artist", "Album", "AlbumArtist", "Date", "Genre", "Time", "Title":
 			track.Set(key, value)
 		case "song_begin":
 			track.Filename = value
