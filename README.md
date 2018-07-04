@@ -1,33 +1,16 @@
 # mpd-fzf
 
-mpd-fzf is a [Music Player Daemon][mpd] (mpd) track selector.
+mpd-fzf is a minimal [Music Player Daemon][mpd] (mpd) track selector that makes it easy to enqueue tracks after the current track.
 
 mpd-fzf parses the mpd database and passes a list of tracks to the [fzf][fzf] command-line finder. This offers a fast way to explore a music collection interactively.
 
 Tracks are formatted as "Artist - Track {Album} (MM:SS)", defaulting to the filename if there's insufficient information.
 
-Running `mpd-fzf` will send the entire mpd database to fzf, and Enter key will play a track.
-
-The compiled `mpd-fzf` binary operates with a shell script `mpd-fzf-play` (provided for bash and fish shells). Both `mpd-fzf` and `mpd-fzf-play` should be available through `$PATH`.
-
-
 ## Installation
 
-Compile with Go.
+    $ go get -u github.com/awused/mpd-fzf
 
-Assuming ~/bin in $PATH:
-
-    $ git clone https://github.com/aver-d/mpd-fzf
-    $ cd mpd-fzf
-    $ go build -o ~/bin/mpd-fzf mpd-fzf.go
-    $ cp mpd-fzf-play.bash ~/bin/mpd-fzf-play
-    $ chmod +x ~/bin/mpd-fzf-play
-
-
-
-`mpd-fzf-play` calls [mpc][mpc] to play the track, so mpc is a dependency. I could change this to make a direct TCP connection to mpd through Go, but there doesn't seem much need given the ubiquity of mpc. The extra script also provides an opportunity to run some additional tasks related to a specific mpd client.
-
-To install mpc do something like…
+It also requires that [MPC][mpc] is installed and properly configured (using `$MPD_HOST` if necessary).
 
     $ sudo apt-get install mpc
 
@@ -35,13 +18,30 @@ or
 
     $ sudo pacman -S mpc
 
-## Run
+## Usage
 
-This is all…
+Running `mpd-fzf` will send the entire mpd database to fzf. Select multiple tracks with TAB or simply hit enter for a single track. Tracks will be added in order after the currently playing track.
 
-    $ mpd-fzf
+It can also be used as a tmux shortcut `bind-key m run "mpd-fzf"`.
 
-Should run very fast.
+## Changes From aver-d/mpd-fzf
+
+### Functionality
+
+The biggest change is the behavioural change. Instead of staying open and playing a new track every time enter is pushed, it takes the output from FZF and adds them after the currently playing track then exits.
+
+* Uses fzf-tmux, which will gracefully fall back regular fzf if tmux isn't running
+* Reads pane width from tmux if possible instead of using stty width
+* Uses fzf -m to allow multiple selections with TAB
+* Doesn't require an external script
+* Performance when parsing the database and building FZF's input is improved
+* Works on FreeBSD
+
+### Bug Fixes
+
+* Handles filenames containing exclamation points properly, which are improperly escaped by FZF when using --bind
+* Handles wide characters in tracks
+* Uses a delimiter that cannot be found in file names
 
 ____
 
