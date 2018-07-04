@@ -68,7 +68,7 @@ func (t *Track) Set(key, value string) {
 		}
 	case "AlbumArtist":
 		// Sometimes AlbumArtist is a very long string of names, discard those
-		if len(value) < 30 {
+		if len(value) < 40 {
 			t.AlbumArtist = value
 		}
 	case "Date":
