@@ -180,9 +180,6 @@ func groupByArtist(tracks []*Track) []*Track {
 
 func parse(scan *bufio.Scanner) []*Track {
 	tracks, track := []*Track{}, new(Track)
-	// The old stack code didn't work as intended since it used slice operations
-	// TODO -- Actually implement a stack that doesn't copy memory unnecessarily?
-	// Probably isn't worth the complexity
 	dirs := []string{}
 
 	for scan.Scan() {
